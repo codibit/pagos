@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es" >
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <title>{$fsc->page->title} &lsaquo; {$fsc->empresa->nombre}</title>
+   <meta name="description" content="FacturaScripts es un software de facturación y contabilidad para pymes. Es software libre bajo licencia GNU/AGPL." />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <link rel="shortcut icon" href="view/img/favicon.ico" />
+   <link rel="stylesheet" href="view/css/bootstrap-yeti.min.css" />
+   <link rel="stylesheet" href="view/css/datepicker.css" />
+   <link rel="stylesheet" href="view/css/custom.css" />
+   <script type="text/javascript" src="view/js/jquery-2.1.1.min.js"></script>
+   <script type="text/javascript" src="view/js/bootstrap.min.js"></script>
+   <script type="text/javascript" src="view/js/bootstrap-datepicker.js" charset="UTF-8"></script>
+   <script type="text/javascript" src="view/js/jquery.autocomplete.min.js"></script>
+   <script type="text/javascript" src="view/js/base.js"></script>
+   <script type="text/javascript">
+      function show_precio(precio)
+      {
+         {if condition="FS_POS_DIVISA=='right'"}
+         return number_format(precio, {#FS_NF0#}, '{#FS_NF1#}', '{#FS_NF2#}')+' {$fsc->simbolo_divisa()}';
+         {else}
+         return '{$fsc->simbolo_divisa()}'+number_format(precio, {#FS_NF0#}, '{#FS_NF1#}', '{#FS_NF2#}');
+         {/if}
+      }
+      function show_numero(numero)
+      {
+         return number_format(numero, {#FS_NF0#}, '{#FS_NF1#}', '{#FS_NF2#}');
+      }
+      function delete_pago(id)
+      {
+         if( confirm("¿Realmente desea eliminar este pago?") )
+            window.location.href = "{$fsc->url()}&delete="+id;
+      }
+   </script>
+   {loop="$fsc->extensions"}
+      {if condition="$value->type=='head'"}{$value->text}{/if}
+   {/loop}
+</head>
+<body>
+   <div class="table-responsive">
+      <table class="table table-hover">
+         <thead>
+            <tr>
+               <th class="text-left">Fase</th>
+               <th class="text-left">Fecha</th>
+               <th class="text-right">Importe</th>
+               <th class="text-right">Pendiente</th>
+               <th class="text-left">Nota</th>
+               <th width="120"></th>
+            </tr>
+         </thead>
+         {loop="$fsc->pagos"}
+         <form class="form" action="{$fsc->url()}" method="post">
+            <tr>
+               <td><div class="form-control">{$value->fase}</div></td>
+               <td>
+                  <input type="hidden" name="idpago" value="{$value->id}"/>
+                  <input type="text" name="fecha" class="form-control datepicker" value="{$value->fecha}" autocomplete="off"/>
+               </td>
+               <td>
+                  <input type="text" name="importe" class="form-control text-right" value="{$value->importe}" autocomplete="off"/>
+               </td>
+               <td>
+                  <div class="form-control text-right">{$fsc->show_precio($value->pendiente)}</div>
+               </td>
+               <td>
+                  <input type="text" name="nota" class="form-control" value="{$value->nota}" autocomplete="off"/>
+               </td>
+               <td class="text-right">
+                  <div class="btn-group">
+                     <a class="btn btn-sm btn-danger" title="Eliminar" onclick="delete_pago('{$value->id}')">
+                        <span class="glyphicon glyphicon-trash"></span>
+                     </a>
+                     <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.submit();" title="Guardar">
+                        <span class="glyphicon glyphicon-floppy-disk"></span>
+                     </button>
+                  </div>
+               </td>
+            </tr>
+         </form>
+         {/loop}
+         {if="!$fsc->pagado"}
+         <form class="form" action="{$fsc->url()}" method="post">
+            <tr class="bg-info">
+               <td>-</td>
+               <td>
+                  <input type="text" name="fecha" class="form-control datepicker" value="{$fsc->today()}" autocomplete="off"/>
+               </td>
+               <td>
+                  <input type="text" name="importe" class="form-control text-right" value="{$fsc->pendiente}" autocomplete="off"/>
+               </td>
+               <td></td>
+               <td>
+                  <input type="text" name="nota" class="form-control" autocomplete="off"/>
+               </td>
+               <td class="text-right">
+                  <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.submit();" title="Guardar">
+                     <span class="glyphicon glyphicon-floppy-disk"></span>
+                  </button>
+               </td>
+            </tr>
+         </form>
+         {/if}
+      </table>
+   </div>
+</body>
+</html>
