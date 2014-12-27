@@ -1,14 +1,13 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * @author Carlos García Gómez      neorazorx@gmail.com
+ * @copyright 2014, Carlos García Gómez. All Rights Reserved. 
  */
 
 require_model('albaran_cliente.php');
 require_model('factura_cliente.php');
 require_model('pago.php');
+require_model('pedido_cliente.php');
 
 /**
  * Description of informe_pago
@@ -80,6 +79,11 @@ class informe_pago extends fs_controller
             $this->pago->fase = ucfirst(FS_ALBARAN);
             $this->pago->idalbaran = $_REQUEST['id'];
          }
+         else if( isset($_REQUEST['pedido']) )
+         {
+            $this->pago->fase = ucfirst(FS_PEDIDO);
+            $this->pago->idpedido = $_REQUEST['id'];
+         }
          
          $this->pago->fecha = $_POST['fecha'];
          $this->pago->importe = floatval($_POST['importe']);
@@ -135,6 +139,32 @@ class informe_pago extends fs_controller
                $this->pendiente -= $value->importe;
                $this->pagos[$i]->pendiente = $this->pendiente;
             }
+            
+            if( abs($this->pendiente) < 0.1 )
+            {
+               $this->pagado = TRUE;
+            }
+         }
+      }
+      else if( isset($_REQUEST['pedido']) )
+      {
+         $this->pagos = $this->pago->all_from_pedido($_REQUEST['id']);
+         
+         $ped0 = new pedido_cliente();
+         $pedido = $ped0->get($_REQUEST['id']);
+         if($pedido)
+         {
+            $this->pendiente = $pedido->total;
+            foreach($this->pagos as $i => $value)
+            {
+               $this->pendiente -= $value->importe;
+               $this->pagos[$i]->pendiente = $this->pendiente;
+            }
+            
+            if( abs($this->pendiente) < 0.1 )
+            {
+               $this->pagado = TRUE;
+            }
          }
       }
       
@@ -150,6 +180,10 @@ class informe_pago extends fs_controller
       else if( isset($_REQUEST['albaran']) )
       {
          return 'index.php?page='.__CLASS__.'&albaran=TRUE&id='.$_REQUEST['id'];
+      }
+      else if( isset($_REQUEST['pedido']) )
+      {
+         return 'index.php?page='.__CLASS__.'&pedido=TRUE&id='.$_REQUEST['id'];
       }
       else
          return parent::url();
@@ -173,6 +207,14 @@ class informe_pago extends fs_controller
               'type' => 'tab',
               'text' => 'Pagos',
               'params' => '&albaran=TRUE'
+          ),
+          array(
+              'name' => 'pago_pedido',
+              'page_from' => __CLASS__,
+              'page_to' => 'ventas_pedido',
+              'type' => 'tab',
+              'text' => 'Pagos',
+              'params' => '&pedido=TRUE'
           )
       );
       foreach($extensiones as $ext)

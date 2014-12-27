@@ -1,0 +1,41 @@
+{include="header"}
+
+<div class="container-fluid" style="margin-top: 10px;">
+   <div class="row">
+      <div class="col-sm-11">
+         <h2 style="margin-top: 0px;">Pagos</h2>
+      </div>
+      <div class="col-sm-1 text-right">
+         <a href="{$fsc->url()}" class="btn btn-sm btn-default">
+            <span class="glyphicon glyphicon-refresh"></span>
+         </a>
+      </div>
+   </div>
+</div>
+
+<div class="table-responsive">
+   <table class="table table-hover">
+      <thead>
+         <tr>
+            <th class="text-left">Fecha</th>
+            <th class="text-left">Fase</th>
+            <th class="text-left">Nota</th>
+            <th class="text-right">Importe</th>
+         </tr>
+      </thead>
+      {loop="$fsc->resultados"}
+      <tr class="clickableRow" href="{$value->url()}">
+         <td>{$value->fecha}</td>
+         <td>{$value->fase}</td>
+         <td>{if="$value->nota==''"}-{else}{$value->nota}{/if}</td>
+         <td class="text-right">{$fsc->show_precio($value->importe)}</td>
+      </tr>
+      {else}
+      <tr>
+         <td class="bg-warning" colspan="4">Sin resultados.</td>
+      </tr>
+      {/loop}
+   </table>
+</div>
+
+{include="footer"}

@@ -1,9 +1,7 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * @author Carlos García Gómez      neorazorx@gmail.com
+ * @copyright 2014, Carlos García Gómez. All Rights Reserved. 
  */
 
 /**
@@ -56,6 +54,24 @@ class pago extends fs_model
    protected function install()
    {
       return '';
+   }
+   
+   public function url()
+   {
+      if( !is_null($this->idfactura) )
+      {
+         return "index.php?page=ventas_factura&id=".$this->idfactura;
+      }
+      else if( !is_null($this->idalbaran) )
+      {
+         return "index.php?page=ventas_albaran&id=".$this->idalbaran;
+      }
+      else if( !is_null($this->idpedido) )
+      {
+         return "index.php?page=ventas_pedido&id=".$this->idpedido;
+      }
+      else
+         return "index.php?page=informe_pagos";
    }
    
    public function get($id)
@@ -133,6 +149,34 @@ class pago extends fs_model
       $plist = array();
       
       $data = $this->db->select("SELECT * FROM pagos WHERE idalbaran = ".$this->var2str($id)." ORDER BY fecha ASC;");
+      if($data)
+      {
+         foreach($data as $d)
+            $plist[] = new pago($d);
+      }
+      
+      return $plist;
+   }
+   
+   public function all_from_pedido($id)
+   {
+      $plist = array();
+      
+      $data = $this->db->select("SELECT * FROM pagos WHERE idpedido = ".$this->var2str($id)." ORDER BY fecha ASC;");
+      if($data)
+      {
+         foreach($data as $d)
+            $plist[] = new pago($d);
+      }
+      
+      return $plist;
+   }
+   
+   public function all()
+   {
+      $plist = array();
+      
+      $data = $this->db->select("SELECT * FROM pagos ORDER BY fecha ASC;");
       if($data)
       {
          foreach($data as $d)
