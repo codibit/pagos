@@ -42,7 +42,7 @@ class pago extends fs_model
          $this->idfactura = NULL;
          $this->idalbaran = NULL;
          $this->idpedido = NULL;
-         $this->fase = 'desconocida';
+         $this->fase = '-';
          $this->fecha = Date('d-m-Y');
          $this->importe = 0;
          $this->nota = '';
@@ -177,6 +177,34 @@ class pago extends fs_model
       $plist = array();
       
       $data = $this->db->select("SELECT * FROM pagos ORDER BY fecha ASC;");
+      if($data)
+      {
+         foreach($data as $d)
+            $plist[] = new pago($d);
+      }
+      
+      return $plist;
+   }
+   
+   public function entradas()
+   {
+      $plist = array();
+      
+      $data = $this->db->select("SELECT * FROM pagos WHERE importe > 0 ORDER BY fecha ASC;");
+      if($data)
+      {
+         foreach($data as $d)
+            $plist[] = new pago($d);
+      }
+      
+      return $plist;
+   }
+   
+   public function salidas()
+   {
+      $plist = array();
+      
+      $data = $this->db->select("SELECT * FROM pagos WHERE importe < 0 ORDER BY fecha ASC;");
       if($data)
       {
          foreach($data as $d)

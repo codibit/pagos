@@ -1,9 +1,24 @@
 {include="header"}
 
+<script type="text/javascript">
+   $(document).ready(function() {
+      $("#b_nuevo_pago").click(function(event) {
+         event.preventDefault();
+         $("#modal_nuevo_pago").modal('show');
+         document.f_nuevo_pago.nota.focus();
+      });
+   });
+</script>
+
 <div class="container-fluid" style="margin-top: 10px;">
    <div class="row">
       <div class="col-sm-11">
-         <h2 style="margin-top: 0px;">Pagos</h2>
+         <h2 style="margin-top: 0px;">
+            Pagos
+            <a href="#" id="b_nuevo_pago" class="btn btn-xs btn-default">
+               <span class="glyphicon glyphicon-plus"></span>
+            </a>
+         </h2>
       </div>
       <div class="col-sm-1 text-right">
          <a href="{$fsc->url()}" class="btn btn-sm btn-default">
@@ -12,6 +27,22 @@
       </div>
    </div>
 </div>
+
+<ul class="nav nav-tabs">
+   <li role="presentation"{if="!$fsc->tipo"} class="active"{/if}>
+      <a href="{$fsc->url()}">Todos</a>
+   </li>
+   <li role="presentation"{if="$fsc->tipo=='entradas'"} class="active"{/if}>
+      <a href="{$fsc->url()}&tipo=entradas">
+         <span class="glyphicon glyphicon-import"></span> &nbsp; Entradas
+      </a>
+   </li>
+   <li role="presentation"{if="$fsc->tipo=='salidas'"} class="active"{/if}>
+      <a href="{$fsc->url()}&tipo=salidas">
+         <span class="glyphicon glyphicon-export"></span> &nbsp; Salidas
+      </a>
+   </li>
+</ul>
 
 <div class="table-responsive">
    <table class="table table-hover">
@@ -24,7 +55,7 @@
          </tr>
       </thead>
       {loop="$fsc->resultados"}
-      <tr class="clickableRow" href="{$value->url()}">
+      <tr class="clickableRow{if="$value->importe<=0"} bg-warning{/if}" href="{$value->url()}">
          <td>{$value->fecha}</td>
          <td>{$value->fase}</td>
          <td>{if="$value->nota==''"}-{else}{$value->nota}{/if}</td>
@@ -37,5 +68,39 @@
       {/loop}
    </table>
 </div>
+
+<form name="f_nuevo_pago" class="form" action="{$fsc->url()}" method="post">
+   <div class="modal" id="modal_nuevo_pago">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+               <h4 class="modal-title">Nuevo pago</h4>
+            </div>
+            <div class="modal-body">
+               <div class="form-group">
+                  Nota:
+                  <input type="text" name="nota" class="form-control" autocomplete="off"/>
+               </div>
+               <div class="form-group">
+                  Importe:
+                  <input type="text" name="importe" class="form-control" value="0" autocomplete="off"/>
+               </div>
+               <div class="form-group">
+                  Fecha:
+                  <input type="text" name="fecha" class="form-control datepicker" value="{$fsc->today()}" autocomplete="off"/>
+               </div>
+            </div>
+            <div class="modal-footer">
+               <button class="btn btn-sm btn-primary" type="submit" onclick="this.disabled=true;this.form.submit();">
+                  <span class="glyphicon glyphicon-floppy-disk"></span> &nbsp; Guardar
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</form>
 
 {include="footer"}
