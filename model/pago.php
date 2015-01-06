@@ -71,7 +71,7 @@ class pago extends fs_model
          return "index.php?page=ventas_pedido&id=".$this->idpedido;
       }
       else
-         return "index.php?page=informe_pagos";
+         return 'index.php?page=informe_pagos&id='.$this->id;
    }
    
    public function get($id)

@@ -1,6 +1,19 @@
 {include="header"}
 
 <script type="text/javascript">
+   function get_modal_pago(id)
+   {
+      $.ajax({
+         type: 'POST',
+         url: '{$fsc->url()}',
+         dataType: 'html',
+         data: 'ajax=TRUE&id='+id,
+         success: function(datos) {
+            $("#div_editar_pago").html(datos);
+            $("#modal_editar_pago").modal('show');
+         }
+      });
+   }
    $(document).ready(function() {
       $("#b_nuevo_pago").click(function(event) {
          event.preventDefault();
@@ -21,7 +34,7 @@
          </h2>
       </div>
       <div class="col-sm-1 text-right">
-         <a href="{$fsc->url()}" class="btn btn-sm btn-default">
+         <a href="{$fsc->url()}" class="btn btn-sm btn-default" title="recargar la página">
             <span class="glyphicon glyphicon-refresh"></span>
          </a>
       </div>
@@ -49,13 +62,13 @@
       <thead>
          <tr>
             <th class="text-left">Fecha</th>
-            <th class="text-left">Fase</th>
+            <th class="text-left">Documento</th>
             <th class="text-left">Nota</th>
             <th class="text-right">Importe</th>
          </tr>
       </thead>
       {loop="$fsc->resultados"}
-      <tr class="clickableRow{if="$value->importe<=0"} bg-warning{/if}" href="{$value->url()}">
+      <tr class="clickableRow{if="$value->importe<=0"} bg-warning{/if}" href="#" onclick="get_modal_pago('{$value->id}')">
          <td>{$value->fecha}</td>
          <td>{$value->fase}</td>
          <td>{if="$value->nota==''"}-{else}{$value->nota}{/if}</td>
@@ -102,5 +115,7 @@
       </div>
    </div>
 </form>
+
+<div id="div_editar_pago"></div>
 
 {include="footer"}

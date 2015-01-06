@@ -13,8 +13,9 @@ require_model('pago.php');
  */
 class informe_pagos extends fs_controller
 {
-   public $tipo;
+   public $pago;
    public $resultados;
+   public $tipo;
    
    public function __construct()
    {
@@ -24,9 +25,19 @@ class informe_pagos extends fs_controller
    protected function process()
    {
       $this->show_fs_toolbar = FALSE;
+      $this->pago = FALSE;
       $pago = new pago();
       
-      if( isset($_POST['nota']) )
+      if( isset($_REQUEST['id']) )
+      {
+         $this->pago = $pago->get($_REQUEST['id']);
+         
+         if( isset($_POST['ajax']) )
+         {
+            $this->template = 'ajax_pago';
+         }
+      }
+      else if( isset($_POST['nota']) )
       {
          $pago->nota = $_POST['nota'];
          $pago->importe = floatval($_POST['importe']);
@@ -38,6 +49,21 @@ class informe_pagos extends fs_controller
          }
          else
             $this->new_error_msg('Imposible guardar los datos.');
+      }
+      else if( isset($_GET['delete']) )
+      {
+         $pago2 = $pago->get($_GET['delete']);
+         if($pago2)
+         {
+            if( $pago2->delete() )
+            {
+               $this->new_message('Pago '.$_GET['delete'].' eliminado correctamente.');
+            }
+            else
+               $this->new_error_msg('Error al eliminar el pago '.$_GET['delete']);
+         }
+         else
+            $this->new_error_msg('Pago '.$_GET['delete'].' no encontrado.');
       }
       
       $this->tipo = FALSE;
