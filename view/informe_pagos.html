@@ -25,18 +25,30 @@
 
 <div class="container-fluid" style="margin-top: 10px;">
    <div class="row">
-      <div class="col-sm-11">
-         <h2 style="margin-top: 0px;">
-            Pagos
-            <a href="#" id="b_nuevo_pago" class="btn btn-xs btn-default">
-               <span class="glyphicon glyphicon-plus"></span>
+      <div class="col-sm-6">
+         <div class="btn-group">
+            <a class="btn btn-sm btn-default" href="{$fsc->url()}" title="Recargar la página">
+               <span class="glyphicon glyphicon-refresh"></span>
             </a>
-         </h2>
+            {if condition="$fsc->page->is_default()"}
+            <a class="btn btn-sm btn-default active" href="{$fsc->url()}&amp;default_page=FALSE" title="desmarcar como página de inicio">
+               <span class="glyphicon glyphicon-home"></span>
+            </a>
+            {else}
+            <a class="btn btn-sm btn-default" href="{$fsc->url()}&amp;default_page=TRUE" title="marcar como página de inicio">
+               <span class="glyphicon glyphicon-home"></span>
+            </a>
+            {/if}
+         </div>
+         
+         <div class="btn-group">
+            <a href="#" id="b_nuevo_pago" class="btn btn-sm btn-success">
+               <span class="glyphicon glyphicon-plus"></span> &nbsp; Nuevo
+            </a>
+         </div>
       </div>
-      <div class="col-sm-1 text-right">
-         <a href="{$fsc->url()}" class="btn btn-sm btn-default" title="recargar la página">
-            <span class="glyphicon glyphicon-refresh"></span>
-         </a>
+      <div class="col-sm-6 text-right">
+         <h2 style="margin-top: 0px;">Pagos</h2>
       </div>
    </div>
 </div>
