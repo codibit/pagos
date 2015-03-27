@@ -1,7 +1,20 @@
 <?php
-/**
- * @author Carlos García Gómez      neorazorx@gmail.com
- * @copyright 2015, Carlos García Gómez. All Rights Reserved. 
+/*
+ * This file is part of FacturaSctipts
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_model('pago.php');
@@ -28,7 +41,7 @@ class informe_pagos extends fs_controller
       $this->pago = FALSE;
       $pago = new pago();
       
-      if( isset($_REQUEST['id']) )
+      if( isset($_REQUEST['id']) ) /// ver un pago
       {
          $this->pago = $pago->get($_REQUEST['id']);
          
@@ -36,8 +49,21 @@ class informe_pagos extends fs_controller
          {
             $this->template = 'ajax_pago';
          }
+         else if( isset($_POST['nota']) ) /// modificar un pago
+         {
+            $this->pago->nota = $_POST['nota'];
+            $this->pago->importe = floatval($_POST['importe']);
+            $this->pago->fecha = $_POST['fecha'];
+            
+            if( $this->pago->save() )
+            {
+               $this->new_message('Datos guardados correctamente.');
+            }
+            else
+               $this->new_error_msg('Imposible guardar los datos.');
+         }
       }
-      else if( isset($_POST['nota']) )
+      else if( isset($_POST['nota']) ) /// nuevo pago
       {
          $pago->nota = $_POST['nota'];
          $pago->importe = floatval($_POST['importe']);

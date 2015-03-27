@@ -1,7 +1,20 @@
 <?php
-/**
- * @author Carlos García Gómez      neorazorx@gmail.com
- * @copyright 2014, Carlos García Gómez. All Rights Reserved. 
+/*
+ * This file is part of FacturaSctipts
+ * Copyright (C) 2014-2015  Carlos Garcia Gomez  neorazorx@gmail.com
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_model('albaran_cliente.php');
@@ -14,7 +27,7 @@ require_model('pedido_cliente.php');
  *
  * @author carlos
  */
-class informe_pago extends fs_controller
+class tab_pagos extends fs_controller
 {
    public $pagado;
    public $pago;
@@ -23,10 +36,10 @@ class informe_pago extends fs_controller
    
    public function __construct()
    {
-      parent::__construct(__CLASS__, 'pago', 'informes', FALSE, FALSE);
+      parent::__construct(__CLASS__, 'pago', 'ventas', FALSE, FALSE);
    }
    
-   protected function process()
+   protected function private_core()
    {
       $this->pagado = FALSE;
       $this->pago = new pago();
@@ -41,6 +54,20 @@ class informe_pago extends fs_controller
             if( $pago->delete() )
             {
                $this->new_message('Pago eliminado correctamente.');
+               
+               if( !is_null($pago->idfactura) )
+               {
+                  $fact0 = new factura_cliente();
+                  $factura = $fact0->get($pago->idfactura);
+                  if($factura)
+                  {
+                     if($factura->pagada)
+                     {
+                        $factura->pagada = FALSE;
+                        $factura->save();
+                     }
+                  }
+               }
             }
             else
                $this->new_error_msg('Error al eliminar el pago.');
@@ -48,7 +75,7 @@ class informe_pago extends fs_controller
          else
             $this->new_error_msg('Pago no encontrado.');
       }
-      else if( isset($_POST['idpago']) )
+      else if( isset($_POST['idpago']) ) /// modificar pago
       {
          $pago = $this->pago->get($_POST['idpago']);
          if($pago)
@@ -88,19 +115,28 @@ class informe_pago extends fs_controller
          $this->pago->fecha = $_POST['fecha'];
          $this->pago->importe = floatval($_POST['importe']);
          $this->pago->nota = $_POST['nota'];
-         $this->pago->save();
+         
+         if( $this->pago->save() )
+         {
+            $this->new_message('Pago guardado correctamente.');
+         }
+         else
+            $this->new_error_msg('Error al guardar el pago.');
       }
       
       if( isset($_REQUEST['factura']) )
       {
+         /// esto es la fase de factura
          $fact0 = new factura_cliente();
          $factura = $fact0->get($_REQUEST['id']);
          if($factura)
          {
             /// buscamos pagos de la fase albarán
+            /// una factura puede ser una agrupación de muchos albaranes
             $idalbaran = NULL;
             foreach($factura->get_lineas() as $linea)
             {
+               /// el idalbaran lo tienes en las lineas de la factura
                if($linea->idalbaran != $idalbaran)
                {
                   $idalbaran = $linea->idalbaran;
@@ -116,6 +152,7 @@ class informe_pago extends fs_controller
                $this->pagos[$i]->pendiente = $this->pendiente;
             }
             
+            /// si nos han pagado el total, marcamos la factura como pagada
             if( !$factura->pagada AND abs($this->pendiente) < 0.1 )
             {
                $factura->pagada = TRUE;
@@ -127,7 +164,14 @@ class informe_pago extends fs_controller
       }
       else if( isset($_REQUEST['albaran']) )
       {
+         /// fase de albarán
          $this->pagos = $this->pago->all_from_albaran($_REQUEST['id']);
+         
+         /**
+          * Falta poner el idalbaran a los pagos de los pedidos que forman este
+          * albarán. Si es que hay.
+          * Copia esto de la fase de factura.
+          */
          
          $alb0 = new albaran_cliente();
          $albaran = $alb0->get($_REQUEST['id']);
@@ -148,6 +192,7 @@ class informe_pago extends fs_controller
       }
       else if( isset($_REQUEST['pedido']) )
       {
+         /// fose de pedido
          $this->pagos = $this->pago->all_from_pedido($_REQUEST['id']);
          
          $ped0 = new pedido_cliente();
