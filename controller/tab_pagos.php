@@ -143,7 +143,7 @@ class tab_pagos extends fs_controller
                   $this->db->exec("UPDATE pagos SET idfactura = ".$fact0->var2str($_REQUEST['id'])." WHERE idalbaran = ".$fact0->var2str($idalbaran).";");
                }
             }
-            
+
             $this->pagos = $this->pago->all_from_factura($_REQUEST['id']);
             $this->pendiente = $factura->total;
             foreach($this->pagos as $i => $value)
@@ -164,20 +164,32 @@ class tab_pagos extends fs_controller
       }
       else if( isset($_REQUEST['albaran']) )
       {
-         /// fase de albarán
+
          $this->pagos = $this->pago->all_from_albaran($_REQUEST['id']);
-         
-         /**
-          * Falta poner el idalbaran a los pagos de los pedidos que forman este
-          * albarán. Si es que hay.
-          * Copia esto de la fase de factura.
-          */
-         
+
+
+
          $alb0 = new albaran_cliente();
          $albaran = $alb0->get($_REQUEST['id']);
+
+
          if($albaran)
          {
+
+            $idpedido = NULL;
+            foreach($albaran->get_lineas() as $linea)
+            {
+
+               if($linea->idpedido != $idpedido)
+               {
+                  $idpedido = $linea->idpedido;
+                  $this->db->exec("UPDATE pagos SET idalbaran = ".$alb0->var2str($_REQUEST['id'])." WHERE idpedido = ".$alb0->var2str($idpedido).";");
+               }
+            }
+
+            $this->pagos = $this->pago->all_from_albaran($_REQUEST['id']);
             $this->pendiente = $albaran->total;
+
             foreach($this->pagos as $i => $value)
             {
                $this->pendiente -= $value->importe;
@@ -189,6 +201,7 @@ class tab_pagos extends fs_controller
                $this->pagado = TRUE;
             }
          }
+
       }
       else if( isset($_REQUEST['pedido']) )
       {
